@@ -1,4 +1,7 @@
+import Python
 func initPython(){
-  print("init python")
   Py_Initialize()
+}
+func runSimpleString(string: String) {
+        PyRun_SimpleStringFlags(string, nil);
 }
