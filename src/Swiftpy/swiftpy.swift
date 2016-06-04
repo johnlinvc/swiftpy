@@ -12,11 +12,11 @@ public protocol CPyObjConvertible {
         var cPyObjPtr:CPyObj? {
                 get
         }
-        @discardableResult func call(funcName:String, args:CPyObjConvertible...) -> PythonObject
+        @discardableResult func call(_ funcName:String, args:CPyObjConvertible...) -> PythonObject
 }
 
 extension CPyObjConvertible {
-        @discardableResult public func call(funcName:String, args:CPyObjConvertible...) -> PythonObject{
+        @discardableResult public func call(_ funcName:String, args:CPyObjConvertible...) -> PythonObject{
                 let pFunc = PyObject_GetAttrString(cPyObjPtr!, funcName)
                 guard PyCallable_Check(pFunc) == 1 else { return PythonObject() }
                 let pArgs = PyTuple_New(args.count)
