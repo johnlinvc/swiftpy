@@ -32,6 +32,7 @@ public protocol CPyObjConvertible {
         @discardableResult func call(_ funcName:String, args:CPyObjConvertible...) -> PythonObject
         func toPythonString() -> PythonString
         func attr(_ name:String) -> PythonObject
+        func setAttr(_ name:String, value:CPyObjConvertible)
 }
 
 extension CPyObjConvertible {
@@ -48,6 +49,7 @@ extension CPyObjConvertible {
                 return PythonObject(ptr: pValue)
         }
 
+        //FIXME use PyObject_Str instead
         public func toPythonString() -> PythonString {
                 runSimpleString("def _swiftpy_to_str_(obj):\n" +
                      "    return str(obj)")
@@ -58,6 +60,10 @@ extension CPyObjConvertible {
         public func attr(_ name:String) -> PythonObject {
                 guard PyObject_HasAttrString(cPyObjPtr!, name) == 1 else {return PythonObject()}
                 return PythonObject(ptr:PyObject_GetAttrString(cPyObjPtr!, name))
+        }
+
+        public func setAttr(_ name:String, value:CPyObjConvertible) {
+                PyObject_SetAttrString(cPyObjPtr!, name, value.cPyObjPtr!)
         }
 
 }
