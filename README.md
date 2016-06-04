@@ -1,4 +1,4 @@
-# Swiftpy : calling Python from Swift
+# Swiftpy : embedding Python in Swift
 
 ## Requirements
 
