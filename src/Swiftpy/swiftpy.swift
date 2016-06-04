@@ -14,11 +14,23 @@ public protocol CPyObjConvertible {
         }
 }
 
-public class PythonString : CPyObjConvertible, CustomStringConvertible{
+public class PythonString : CPyObjConvertible, CustomStringConvertible, StringLiteralConvertible{
         public let obj:PythonObject
-        public init(stringLiteral:String) {
+
+        public typealias ExtendedGraphemeClusterLiteralType = StringLiteralType
+        public typealias UnicodeScalarLiteralType = StringLiteralType
+        public required init(stringLiteral:String) {
                 obj = PythonObject(ptr: PyString_FromString(stringLiteral))
         }
+
+        public required init(extendedGraphemeClusterLiteral value: ExtendedGraphemeClusterLiteralType) {
+                obj = PythonObject(ptr: PyString_FromString(value))
+        }
+
+        public required init(unicodeScalarLiteral value: UnicodeScalarLiteralType) {
+                obj = PythonObject(ptr: PyString_FromString("\(value)"))
+        }
+
         public var cPyObjPtr:CPyObj? { return obj.ptr }
         public var description: String {
                 get {
