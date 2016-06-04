@@ -26,7 +26,7 @@ run demo
 - load python module
 - call function on python objects with normal args(no kargs)
 - convert String between Swift & Python
-- getting attr from object
+- getting/setting attr from object
 
 ## Usage
 
@@ -36,6 +36,5 @@ see [Demo](src/SwiftpyDemo/main.swift)
 
 - run python code from file
 - automagic conversion between Swift & Python
-- setting attr for object
 - call function with keyword args
 - test system
