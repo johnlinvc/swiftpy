@@ -12,6 +12,22 @@ public protocol CPyObjConvertible {
         var cPyObjPtr:CPyObj? {
                 get
         }
+        @discardableResult func call(funcName:String, args:CPyObjConvertible...) -> PythonObject
+}
+
+extension CPyObjConvertible {
+        @discardableResult public func call(funcName:String, args:CPyObjConvertible...) -> PythonObject{
+                let pFunc = PyObject_GetAttrString(cPyObjPtr!, funcName)
+                guard PyCallable_Check(pFunc) == 1 else { return PythonObject() }
+                let pArgs = PyTuple_New(args.count)
+                for (idx,obj) in args.enumerated() {
+                        let i:Int = idx
+                        PyTuple_SetItem(pArgs, i, obj.cPyObjPtr!)
+                }
+                let pValue = PyObject_CallObject(pFunc, pArgs)
+                Py_DecRef(pArgs)
+                return PythonObject(ptr: pValue)
+        }
 }
 
 public class PythonString : CPyObjConvertible, CustomStringConvertible, StringLiteralConvertible{
@@ -45,7 +61,7 @@ public func pythonImport(name:String) -> PythonObject{
         return PythonObject(ptr:module)
 }
 
-public class PythonObject :CustomDebugStringConvertible {
+public class PythonObject : CustomDebugStringConvertible, CPyObjConvertible {
         let ptr:CPyObj?
         public init() {
                 ptr = nil
@@ -53,22 +69,13 @@ public class PythonObject :CustomDebugStringConvertible {
         init(ptr:CPyObj?) {
                 self.ptr = ptr
         }
+        public var cPyObjPtr:CPyObj? {
+                return ptr
+        }
         public var debugDescription: String {
                 get {
                         guard let pptr = ptr else { return "nil" }
                         return pptr.debugDescription
                 }
-        }
-        @discardableResult public func call(funcName:String, args:CPyObjConvertible...) -> PythonObject{
-                let pFunc = PyObject_GetAttrString(ptr!, funcName)
-                guard PyCallable_Check(pFunc) == 1 else { return PythonObject() }
-                let pArgs = PyTuple_New(args.count)
-                for (idx,obj) in args.enumerated() {
-                        let i:Int = idx
-                        PyTuple_SetItem(pArgs, i, obj.cPyObjPtr!)
-                }
-                let pValue = PyObject_CallObject(pFunc, pArgs)
-                Py_DecRef(pArgs)
-                return PythonObject(ptr: pValue)
         }
 }
