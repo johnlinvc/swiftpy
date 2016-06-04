@@ -28,6 +28,7 @@ public protocol CPyObjConvertible {
         var cPyObjPtr:CPyObj? {
                 get
         }
+        //TODO test the case of method with self
         @discardableResult func call(_ funcName:String, args:CPyObjConvertible...) -> PythonObject
         func toPythonString() -> PythonString
         func attr(_ name:String) -> PythonObject
