@@ -5,6 +5,20 @@
 - Swift toolchain swift-DEVELOPMENT-SNAPSHOT-2016-05-31-a-osx
 - Python 2.7.10_2 (installed with home brew)
 
+## Building
+
+```bash
+git checkout develop
+./build.sh
+```
+
+run demo
+
+```bash
+./build.sh
+.build/debug/SwiftpyDemo
+```
+
 ## Features
 
 - run python code from string
@@ -17,4 +31,5 @@
 - run python code from file
 - call function with keyword args
 - test system
-- automagic conversion between Swift & 
+- getting attr from object
+- automagic conversion between Swift & Python
