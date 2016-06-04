@@ -49,12 +49,8 @@ extension CPyObjConvertible {
                 return PythonObject(ptr: pValue)
         }
 
-        //FIXME use PyObject_Str instead
         public func toPythonString() -> PythonString {
-                evalStatement("def _swiftpy_to_str_(obj):\n" +
-                     "    return str(obj)")
-                let main = pythonImport(name: "__main__")
-                return PythonString(obj:main.call("_swiftpy_to_str_",args:self))
+                return PythonString(obj:PythonObject(ptr:PyObject_Str(cPyObjPtr!)))
         }
 
         public func attr(_ name:String) -> PythonObject {
