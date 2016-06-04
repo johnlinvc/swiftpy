@@ -21,8 +21,7 @@ class PythonString : CustomStringConvertible{
 }
 
 func pythonImport(name:String) -> PythonObject{
-        let pName = PythonString(stringLiteral:name)
-        let module = PyImport_Import(pName.obj.ptr)
+        let module = PyImport_ImportModule(name)
         return PythonObject(ptr:module)
 }
 
@@ -40,7 +39,7 @@ class PythonObject :CustomDebugStringConvertible {
                         return pptr.debugDescription
                 }
         }
-        func call(funcName:String, args:PythonObject...) -> PythonObject{
+        @discardableResult func call(funcName:String, args:PythonObject...) -> PythonObject{
                 let pFunc = PyObject_GetAttrString(ptr!, funcName)
                 guard PyCallable_Check(pFunc) == 1 else { return PythonObject() }
                 let pArgs = PyTuple_New(args.count)
