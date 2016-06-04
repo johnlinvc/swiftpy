@@ -30,6 +30,7 @@ public protocol CPyObjConvertible {
         }
         @discardableResult func call(_ funcName:String, args:CPyObjConvertible...) -> PythonObject
         func toPythonString() -> PythonString
+        func attr(_ name:String) -> PythonObject
 }
 
 extension CPyObjConvertible {
@@ -45,12 +46,19 @@ extension CPyObjConvertible {
                 Py_DecRef(pArgs)
                 return PythonObject(ptr: pValue)
         }
+
         public func toPythonString() -> PythonString {
                 runSimpleString("def _swiftpy_to_str_(obj):\n" +
                      "    return str(obj)")
                 let main = pythonImport(name: "__main__")
                 return PythonString(obj:main.call("_swiftpy_to_str_",args:self))
         }
+
+        public func attr(_ name:String) -> PythonObject {
+                guard PyObject_HasAttrString(cPyObjPtr!, name) == 1 else {return PythonObject()}
+                return PythonObject(ptr:PyObject_GetAttrString(cPyObjPtr!, name))
+        }
+
 }
 
 public class PythonString : CPyObjConvertible, CustomStringConvertible, StringLiteralConvertible{
