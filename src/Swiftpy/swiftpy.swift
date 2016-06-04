@@ -1,8 +1,10 @@
 import Python
+
 public func initPython(){
   Py_Initialize()
 }
-public func runSimpleString(string: String) {
+
+public func runSimpleString(_ string: String) {
         PyRun_SimpleStringFlags(string, nil);
 }
 
