@@ -27,6 +27,10 @@ run demo
 - call function on python objects with normal args(no kargs)
 - convert String between Swift & Python
 
+## Usage
+
+see [Demo](src/SwiftpyDemo/main.swift)
+
 ## Todos
 
 - run python code from file
