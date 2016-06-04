@@ -2,6 +2,7 @@
 
 ## Requirements
 
+- OSX 10.11.4
 - Swift toolchain swift-DEVELOPMENT-SNAPSHOT-2016-05-31-a-osx
 - Python 2.7.10_2 (installed with home brew)
 
