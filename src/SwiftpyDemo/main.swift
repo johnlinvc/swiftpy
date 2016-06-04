@@ -1,3 +1,4 @@
+import Swiftpy
 initPython()
 runSimpleString(string:"def p(str):\n  print str\n")
 let main = pythonImport(name: "__main__")
