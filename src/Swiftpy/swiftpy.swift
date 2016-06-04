@@ -8,6 +8,20 @@ public func runSimpleString(_ string: String) {
         PyRun_SimpleStringFlags(string, nil);
 }
 
+func wrapEvalString( string : String) -> String {
+        return "def _swiftpy_eval_wrapper_():\n" +
+               "    result = \(string)\n" +
+               "    return result"
+}
+
+//TODO handle def case
+public func eval(_ code:String) -> PythonObject {
+        let wrappedCode = wrapEvalString(string:code)
+        runSimpleString(wrappedCode)
+        let main = pythonImport(name: "__main__")
+        return main.call("_swiftpy_eval_wrapper_")
+}
+
 public typealias CPyObj = UnsafeMutablePointer<PyObject>
 
 public protocol CPyObjConvertible {
@@ -15,6 +29,7 @@ public protocol CPyObjConvertible {
                 get
         }
         @discardableResult func call(_ funcName:String, args:CPyObjConvertible...) -> PythonObject
+        func toPythonString() -> PythonString
 }
 
 extension CPyObjConvertible {
@@ -29,6 +44,12 @@ extension CPyObjConvertible {
                 let pValue = PyObject_CallObject(pFunc, pArgs)
                 Py_DecRef(pArgs)
                 return PythonObject(ptr: pValue)
+        }
+        public func toPythonString() -> PythonString {
+                runSimpleString("def _swiftpy_to_str_(obj):\n" +
+                     "    return str(obj)")
+                let main = pythonImport(name: "__main__")
+                return PythonString(obj:main.call("_swiftpy_to_str_",args:self))
         }
 }
 
@@ -49,6 +70,10 @@ public class PythonString : CPyObjConvertible, CustomStringConvertible, StringLi
                 obj = PythonObject(ptr: PyString_FromString("\(value)"))
         }
 
+        init(obj:PythonObject){
+                self.obj = obj
+        }
+
         public var cPyObjPtr:CPyObj? { return obj.ptr }
         public var description: String {
                 get {
@@ -63,6 +88,12 @@ public func pythonImport(name:String) -> PythonObject{
         return PythonObject(ptr:module)
 }
 
+//TODO
+public func convertCPyObj(cPyObj ptr:CPyObj) -> CPyObjConvertible {
+        //NOT impl yet
+        return PythonObject(ptr:ptr)
+}
+
 public class PythonObject : CustomDebugStringConvertible, CPyObjConvertible {
         let ptr:CPyObj?
         public init() {
@@ -74,6 +105,8 @@ public class PythonObject : CustomDebugStringConvertible, CPyObjConvertible {
         public var cPyObjPtr:CPyObj? {
                 return ptr
         }
+
+
         public var debugDescription: String {
                 get {
                         guard let pptr = ptr else { return "nil" }
