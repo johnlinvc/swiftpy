@@ -1,7 +1,7 @@
 import Swiftpy
 
 initPython()
-runSimpleString("def p(str):\n  print str\n")
+evalStatement("def p(str):\n  print str\n")
 let main = pythonImport(name: "__main__")
 let hello:PythonString = "hello python fuction"
 let upperHello = hello.call("upper")
@@ -19,7 +19,7 @@ let defFoo = "class Foo:\n" +
              "    def __init__(self):\n" +
              "        self.bar = 'i am an ivar'"
 
-runSimpleString(defFoo)
+evalStatement(defFoo)
 let foo = eval("Foo()")
 let bar = foo.attr("bar")
 print(bar.toPythonString())

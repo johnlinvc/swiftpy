@@ -4,7 +4,7 @@ public func initPython(){
   Py_Initialize()
 }
 
-public func runSimpleString(_ string: String) {
+public func evalStatement(_ string: String) {
         PyRun_SimpleStringFlags(string, nil);
 }
 
@@ -17,7 +17,7 @@ func wrapEvalString( string : String) -> String {
 //TODO handle def case
 public func eval(_ code:String) -> PythonObject {
         let wrappedCode = wrapEvalString(string:code)
-        runSimpleString(wrappedCode)
+        evalStatement(wrappedCode)
         let main = pythonImport(name: "__main__")
         return main.call("_swiftpy_eval_wrapper_")
 }
@@ -51,7 +51,7 @@ extension CPyObjConvertible {
 
         //FIXME use PyObject_Str instead
         public func toPythonString() -> PythonString {
-                runSimpleString("def _swiftpy_to_str_(obj):\n" +
+                evalStatement("def _swiftpy_to_str_(obj):\n" +
                      "    return str(obj)")
                 let main = pythonImport(name: "__main__")
                 return PythonString(obj:main.call("_swiftpy_to_str_",args:self))
