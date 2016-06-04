@@ -5,16 +5,24 @@ public func initPython(){
 public func runSimpleString(string: String) {
         PyRun_SimpleStringFlags(string, nil);
 }
-typealias CPyObj = UnsafeMutablePointer<PyObject>
 
-public class PythonString : CustomStringConvertible{
+public typealias CPyObj = UnsafeMutablePointer<PyObject>
+
+public protocol CPyObjConvertible {
+        var cPyObjPtr:CPyObj? {
+                get
+        }
+}
+
+public class PythonString : CPyObjConvertible, CustomStringConvertible{
         public let obj:PythonObject
         public init(stringLiteral:String) {
                 obj = PythonObject(ptr: PyString_FromString(stringLiteral))
         }
+        public var cPyObjPtr:CPyObj? { return obj.ptr }
         public var description: String {
                 get {
-                        let cstr:UnsafePointer<CChar> = UnsafePointer(PyString_AsString(obj.ptr)!)
+                        let cstr:UnsafePointer<CChar> = UnsafePointer(PyString_AsString(cPyObjPtr)!)
                         return String(cString : cstr)
                 }
         }
@@ -39,13 +47,13 @@ public class PythonObject :CustomDebugStringConvertible {
                         return pptr.debugDescription
                 }
         }
-        @discardableResult public func call(funcName:String, args:PythonObject...) -> PythonObject{
+        @discardableResult public func call(funcName:String, args:CPyObjConvertible...) -> PythonObject{
                 let pFunc = PyObject_GetAttrString(ptr!, funcName)
                 guard PyCallable_Check(pFunc) == 1 else { return PythonObject() }
                 let pArgs = PyTuple_New(args.count)
                 for (idx,obj) in args.enumerated() {
                         let i:Int = idx
-                        PyTuple_SetItem(pArgs, i, obj.ptr)
+                        PyTuple_SetItem(pArgs, i, obj.cPyObjPtr!)
                 }
                 let pValue = PyObject_CallObject(pFunc, pArgs)
                 Py_DecRef(pArgs)
