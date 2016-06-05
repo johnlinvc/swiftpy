@@ -4,7 +4,7 @@ initPython()
 
 let hello:PythonString = "hello python fuction"
 let upperHello = hello.call("upper")
-print(upperHello.toPythonString())
+print(upperHello)
 
 let defLeftPad = "def leftPad(str,len,fillchar):\n" +
                  "    return str.rjust(len,fillchar)"
@@ -14,13 +14,13 @@ let leftPadStr:PythonString = "leftPad"
 let n:PythonInt = 10
 let fillChar:PythonString = "j"
 let leftPadded = call("leftPad",args: leftPadStr, n, fillChar)
-print(leftPadded.toPythonString())
+print(leftPadded)
 
 let evalStr = eval("\"look! EVIL\"")
-print(evalStr.toPythonString())
+print(evalStr)
 
 let addStr = eval("1 + 1")
-print(addStr.toPythonString())
+print(addStr)
 
 let defFoo = "class Foo:\n" +
              "    def __init__(self):\n" +
@@ -30,9 +30,9 @@ evalStatement(defFoo)
 
 let foo = eval("Foo()")
 let bar = foo.attr("bar")
-print(bar.toPythonString())
+print(bar)
 
 let newBarVal:PythonString = "i'm the new bar"
 foo.setAttr("bar", value:newBarVal)
 let newBar = foo.attr("bar")
-print(newBar.toPythonString())
+print(newBar)
