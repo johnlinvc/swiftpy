@@ -8,6 +8,11 @@ public func evalStatement(_ string: String) {
         PyRun_SimpleStringFlags(string, nil);
 }
 
+public func call(_ code: String, args:CPyObjConvertible...) -> PythonObject {
+        let main = pythonImport(name: "__main__")
+        return main.call(code, args: args)
+}
+
 func wrapEvalString( string : String) -> String {
         return "def _swiftpy_eval_wrapper_():\n" +
                "    result = \(string)\n" +
@@ -24,12 +29,12 @@ public func eval(_ code:String) -> PythonObject {
 
 public typealias CPyObj = UnsafeMutablePointer<PyObject>
 
-public protocol CPyObjConvertible {
-        var cPyObjPtr:CPyObj? {
-                get
-        }
+public protocol CPyObjConvertible : CustomStringConvertible {
+        var cPyObjPtr:CPyObj? { get }
+        var description:String { get }
         //TODO test the case of method with self
         @discardableResult func call(_ funcName:String, args:CPyObjConvertible...) -> PythonObject
+        @discardableResult func call(_ funcName:String, args:[CPyObjConvertible]) -> PythonObject
         func toPythonString() -> PythonString
         func attr(_ name:String) -> PythonObject
         func setAttr(_ name:String, value:CPyObjConvertible)
@@ -37,6 +42,9 @@ public protocol CPyObjConvertible {
 
 extension CPyObjConvertible {
         @discardableResult public func call(_ funcName:String, args:CPyObjConvertible...) -> PythonObject{
+                return call(funcName, args:args)
+        }
+        @discardableResult public func call(_ funcName:String, args:[CPyObjConvertible]) -> PythonObject {
                 let pFunc = PyObject_GetAttrString(cPyObjPtr!, funcName)
                 guard PyCallable_Check(pFunc) == 1 else { return PythonObject() }
                 let pArgs = PyTuple_New(args.count)
@@ -50,7 +58,8 @@ extension CPyObjConvertible {
         }
 
         public func toPythonString() -> PythonString {
-                return PythonString(obj:PythonObject(ptr:PyObject_Str(cPyObjPtr!)))
+                let ptr = PyObject_Str(cPyObjPtr!)
+                return PythonString(obj:PythonObject(ptr:ptr))
         }
 
         public func attr(_ name:String) -> PythonObject {
@@ -62,9 +71,24 @@ extension CPyObjConvertible {
                 PyObject_SetAttrString(cPyObjPtr!, name, value.cPyObjPtr!)
         }
 
+        public var description: String {
+                let pyString = toPythonString()
+                let cstr:UnsafePointer<CChar> = UnsafePointer(PyString_AsString(pyString.cPyObjPtr!)!)
+                return String(cString : cstr)
+        }
+
 }
 
-public class PythonString : CPyObjConvertible, CustomStringConvertible, StringLiteralConvertible{
+public class PythonInt : CPyObjConvertible, IntegerLiteralConvertible {
+        public let obj:PythonObject
+        public typealias IntegerLiteralType = Int
+        public required init(integerLiteral value: IntegerLiteralType){
+                obj = PythonObject(ptr:PyInt_FromLong(value))
+        }
+        public var cPyObjPtr:CPyObj? { return obj.ptr }
+}
+
+public class PythonString : CPyObjConvertible, StringLiteralConvertible{
         public let obj:PythonObject
 
         public typealias ExtendedGraphemeClusterLiteralType = StringLiteralType
@@ -86,12 +110,6 @@ public class PythonString : CPyObjConvertible, CustomStringConvertible, StringLi
         }
 
         public var cPyObjPtr:CPyObj? { return obj.ptr }
-        public var description: String {
-                get {
-                        let cstr:UnsafePointer<CChar> = UnsafePointer(PyString_AsString(cPyObjPtr)!)
-                        return String(cString : cstr)
-                }
-        }
 }
 
 public func pythonImport(name:String) -> PythonObject{
