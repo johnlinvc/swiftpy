@@ -1,6 +1,7 @@
 import Swiftpy
 
 initPython()
+evalStatement("print 'hello world'")
 
 let hello:PythonString = "hello python fuction"
 let upperHello = hello.call("upper")
